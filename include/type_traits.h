@@ -26,6 +26,8 @@ namespace mystl
 	template<bool b>
 	// using 用法： 别名指定 // 在子类中引用基类的成员 // 命名空间 https://blog.csdn.net/shift_wwx/article/details/78742459
 	using m_bool_constant = m_integral_constant<bool, b>; 
+	// 这个type_traits并没有用bool或者false来作为判断结果，因为这两个是value，而不是type，
+	//重载函数的时候需要type来区分的。所以，用了两个空的struct，true_type和false_type。
 	typedef m_bool_constant<true> m_true_type;
 	typedef m_bool_constant<false> m_false_type;
 
