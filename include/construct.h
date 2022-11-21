@@ -53,6 +53,7 @@ namespace mystl
 	{
 		if (pointer != nullptr)
 		{
+			// 在设计函数的时候，需要自己设计析构函数释放和摧毁内存
 			pointer->~Ty(); // 调用对象析构函数摧毁对象
 		}
 	}
@@ -85,6 +86,7 @@ namespace mystl
 	template<class ForwardIter>
 	void destroy(ForwardIter first, ForwardIter last)
 	{
+		// 如果类型 T 是易损坏类型，且编译器已知此析构函数不会使用任何重要操作
 		destroy_cat(first, last, std::is_trivially_destructible<
 			typename iterator_traits<ForwardIter>::value_type>{});
 	}
