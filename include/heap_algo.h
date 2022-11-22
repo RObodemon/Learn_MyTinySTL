@@ -7,7 +7,7 @@
 
 namespace mystl
 {
-	/*************************************************************************/
+	////////////
 	// push_heap https://blog.csdn.net/LLZK_/article/details/53150369
 	// 该函数接受两个迭代器，表示一个 heap 的容器的首尾，并且新元素已经插入到底部同期的最尾端，调整heap
 	// 堆 heap 一种特殊的完全二叉树数据结构，分为最大堆，最小堆。 
@@ -68,7 +68,7 @@ namespace mystl
 		mystl::push_heap_d(first, last, distance_type(first), comp);
 	}
 
-	/****************************************************************************************/
+	////////////
 	// pop_heap
 	// 该函数接受两个迭代器，表示 heap 容器的首尾，将 heap 的根节点取出放到容器尾部，调整 heap
 	template<class RandomIter,class T,class Distance>
@@ -149,7 +149,7 @@ namespace mystl
 		mystl::pop_heap_aux(first, last - 1, last - 1, *(last - 1), distance_type(first), comp);
 	}
 
-	/****************************************************************************************/
+	////////////
 	// sort_heap
 	// 该函数接受两个迭代器，表示 heap 容器的首尾，不断执行 pop_heap 操作，直到首尾最多相差1
 	template<class RandomIter>
@@ -172,7 +172,7 @@ namespace mystl
 		}
 	}
 
-	/********************************************************************************/
+	////////////
 	// make_heap
 	// 该函数接受两个迭代器，表示heap容器的首尾，把容器内的数据变为一个 heap
 	template<class RandomIter, class Distance>
@@ -201,7 +201,6 @@ namespace mystl
 	{
 		mystl::make_heap_aux(first, last, distance_type(first));
 	}
-
 	// 重载版本使用函数对象 comp 代替比较操作
 	template<class RandomIter, class Distance, class Compared>
 	void make_heap_aut(RandomIter first, RandomIter last, Distance*, Compared comp)
