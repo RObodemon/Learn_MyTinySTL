@@ -24,7 +24,7 @@ namespace mystl
 	}
 
 	template<class InputIter,class ForwardIter>
-	ForwardIter unchecked_unint_copy(InputIter first, InputIter last, ForwardIter result, std::false_type)
+	ForwardIter unchecked_uninit_copy(InputIter first, InputIter last, ForwardIter result, std::false_type)
 	{
 		auto cur = result;
 		try
