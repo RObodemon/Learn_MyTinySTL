@@ -32,6 +32,7 @@ namespace mystl
 	T&& forward(typename std::remove_reference<T>::type&& arg) noexcept
 	{
 		// static_assert: 编译期间的断言，因此叫做静态断言
+		// 如果是左值引用，那么就 "bad forward"
 		static_assert(!std::is_lvalue_reference<T>::value, "bad forward";
 		return static_cast<T&&>(arg);
 	}
