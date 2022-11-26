@@ -1,4 +1,4 @@
-// #ifndef #define #endif 防止重复使用, include 嵌套造成
+﻿// #ifndef #define #endif 防止重复使用, include 嵌套造成
 // first.h 中包含了 second.h。 但是在 third.cpp 中include first.h 和 second.h
 #ifndef TRYTINYSTL_TYPE_TRAITS_H_
 #define TRYTINYSTL_TYPE_TRAITS_H_
@@ -11,8 +11,7 @@
 // https://blog.csdn.net/FlushHip/article/details/82993411
 namespace mystl
 {
-// helper struct
-
+	// https://www.kancloud.cn/digest/stl-sources/177264
 	template <class T, T v>
 	struct m_integral_constant
 	{
@@ -24,28 +23,58 @@ namespace mystl
 	};
 
 	template<bool b>
+	// using 代替typedef，c++11特性
 	// using 用法： 别名指定 // 在子类中引用基类的成员 // 命名空间 https://blog.csdn.net/shift_wwx/article/details/78742459
 	using m_bool_constant = m_integral_constant<bool, b>; 
 	// 这个type_traits并没有用bool或者false来作为判断结果，因为这两个是value，而不是type，
-	//重载函数的时候需要type来区分的。所以，用了两个空的struct，true_type和false_type。
+	// 重载函数的时候需要type来区分的。所以，用了两个空的struct，true_type和false_type。
 	typedef m_bool_constant<true> m_true_type;
 	typedef m_bool_constant<false> m_false_type;
 
-	/***********************************************************************************************/
-	// type traits
 
 	// is_pair
-	
+	// 如果类型是pair, 便会采取 m_true_type, 反之亦然
 	// ---- forward declaration begin
 	template<class T1,class T2>
 	struct pair;
 	// ---- forward declaration end
 
 	template<class T>
-	struct is_pair : mystl::m_false_type {};
+	struct is_pair : m_false_type 
+	{
+	};
 	 
 	template<class T1, class T2>
-	struct is_pair<mystl::pair<T1, T2>> : mystl::m_true_type { };
+	struct is_pair<pair<T1, T2>> : m_true_type 
+	{ 
+	};
+
+	// https://zhuanlan.zhihu.com/p/547313994
+	// is_same
+	template<typename T,typename U>
+	struct is_same :public m_false_type {};
+
+	template<typename T>
+	struct is_same<T, T> :public m_true_type {};
+
+	// template<class T, class U, bool=is_same<T,U>::value>
+	// struct Foo
+	// {
+	//     void print()
+	//     {
+	//         printf("they are different type");
+	//     }    
+	// };
+
+	// template<class T,class U>
+	// struct Foo<T,U,true>
+	// {
+	//     void print()
+	//     {
+
+	//         printf("they are same type");
+	//     }
+	// };
 
 }
 #endif
