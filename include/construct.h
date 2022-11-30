@@ -9,7 +9,10 @@
 #include "iterator.h"
 
 #ifdef _MSC_VER
+// #pragma warning(push)是保存当前的编译器警告状态；
+// #pragma warning(pop)是恢复原先的警告状态。
 #pragma warning(push)
+#pragma warning(disable : 4100)  // unused parameter, 这里的意思是在编译的时候，warning 4100 不会出现
 #endif // _MSC_VER
 
 // C++中的new，至少代表以下三种含义：new operator、operator new、placement new。
@@ -34,7 +37,8 @@ namespace mystl
 		::new((void*)ptr) Ty1(value); // p为Raw（原生）内存地址，value为存储内容
 	}
 
-	// 参数个数可变时候 使用...
+	// 1,参数个数可变时候 使用 class... Args: 这个参数包中可以包含0到任意个模板参数；
+	// 2,... 在模板定义的右边，可以将参数包展开成一个一个独立的参数。
 	template<class Ty, class... Args>
 	void construct(Ty* ptr, Args&&...args)
 	{
