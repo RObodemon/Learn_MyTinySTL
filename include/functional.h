@@ -61,7 +61,6 @@ namespace mystl
 		T operator()(const T& x) const { return -x; }
 	};
 
-	// 数值A若与该元素做op运算，会得到A自己；
 	// 加法的证同元素为0
 	// 乘法的证同元素为1
 	// 加法的证同元素
@@ -146,6 +145,16 @@ namespace mystl
 	struct logical_not :public unarg_function<T, bool>
 	{
 		bool operator()(const T& x) const { return !x; }
+	};
+
+	// 证同函数: 任何数值调用该函数都不会有改变
+	template <class T>
+	struct identity :public unarg_function<T, bool>
+	{
+		const T& operator()(const T& x) const
+		{
+			return x;
+		}
 	};
 
 	// 选择函数：接受一个 pair，返回第一个元素
@@ -252,13 +261,14 @@ namespace mystl
 	// 对于浮点数，逐位哈希
 	inline size_t bitwise_hash(const unsigned char* first, size_t count)
 	{
-	#if (_MSC_VER && _WIN64) || ((__GNUC__ || __clang__) &&__SIZEOF_POINTER__ == 8)
+		// 判断编译器版本
+		#if (_MSC_VER && _WIN64) || ((__GNUC__ || __clang__) &&__SIZEOF_POINTER__ == 8)
 		const size_t fnv_offset = 14695981039346656037ull;
 		const size_t fnv_prime = 1099511628211ull;
-	#else
+		#else
 		const size_t fnv_offset = 2166136261u;
 		const size_t fnv_prime = 16777619u;
-	#endif
+		#endif
 		size_t result = fnv_offset;
 		for (size_t i = 0; i < count; ++i)
 		{
