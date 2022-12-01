@@ -98,9 +98,11 @@ namespace mystl
 		return unchecked_copy_cat(first, last, result, iterator_category(first));
 	}
 
-	// 为 trivialy_copy_assignable 类型提供特化版本, 判断类型是否具备拷贝构造运算符
+	// 为 trivialy_copy_assignable 类型提供特化版本, 测试类型是否具有普通拷贝赋值运算符。
 	// remove_const: 从类型创建非 const 类型
 	// memmove: 将一个缓冲区移到另一个缓冲区，安全版本 memmove_s
+	// 如果没有定义拷贝复制运算符，直接通过memmove拷贝效率最高，
+	// 否则就调用unchecked_copy_cat
 	template<class Tp, class Up> 
 	typename std::enable_if<
 		std::is_same<typename std::remove_const<Tp>::type,Up>::value &&
@@ -268,6 +270,7 @@ namespace mystl
 		const size_t n = static_cast<size_t>(last - first);
 		if (n != 0)
 		{
+			// 将一个缓冲区移动到另外一个缓冲区
 			std::memmove(result, first, n * sizeof(Up));
 		}
 		return result + n;
@@ -368,7 +371,7 @@ namespace mystl
 
 	/***********************************************************************************/
 	// fill_n
-	// 从 first 位置开始填充 n 个值，如果大于一个字节调用循环赋值的函数，否则调用one_byte类型，并且嗲用memset()
+	// 从 first 位置开始填充 n 个值，如果大于一个字节调用循环赋值的函数，否则调用one_byte类型，并且调用memset()
 	template<class OutputIter,class Size,class T>
 	OutputIter unchecked_fill_n(OutputIter first, Size n, const T& value)
 	{
@@ -392,6 +395,8 @@ namespace mystl
 	{
 		if (n > 0)
 		{
+			// void *memset(void *str, int c, size_t n) 
+			// 复制字符 c（一个无符号字符）到参数 str 所指向的字符串的前 n 个字符。
 			std::memset(first, (unsigned char)value, (size_t)(n));
 		}
 		return first + n;
@@ -482,6 +487,8 @@ namespace mystl
 		const auto len1 = last1 - first1;
 		const auto len2 = last2 - first2;
 		// 先比较相同长度的部分
+		// void *memcpy(void *str1, const void *str2, size_t n) 
+		// 从存储区 str2 复制 n 个字节到存储区 str1。
 		const auto result = memcmp(first1, first2, mystl::min(len1, len2));
 		// 若相等，长度较大的比较大
 		return result != 0 ? result < 0 : len1 < len2;
