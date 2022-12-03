@@ -53,7 +53,7 @@ namespace tinystl
     template <class Ty, class... Args>
     void construct(Ty* ptr, Args&&... args)
     {
-        ::new ((void*)ptr) Ty(mystl::forward<Args>(args)...);
+        ::new ((void*)ptr) Ty(tinystl::forward<Args>(args)...);
     }
 
     // destroy: desconstruct

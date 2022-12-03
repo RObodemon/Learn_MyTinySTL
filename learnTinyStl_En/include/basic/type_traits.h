@@ -52,23 +52,23 @@ namespace tinystl
     template<typename T>
     struct is_same<T, T>:public m_true_type{};
 
-    template<class T, class U, bool=is_same<T,U>::value>
-    struct Foo
-    {
-        void print()
-        {
-            printf("they are different type");
-        }    
-    };
-    template<class T,class U>
-    struct Foo<T,U,true>
-    {
-        void print()
-        {
+    // template<class T, class U, bool=is_same<T,U>::value>
+    // struct Foo
+    // {
+    //     void print()
+    //     {
+    //         printf("they are different type");
+    //     }    
+    // };
 
-            printf("they are same type");
-        }
-    };
+    // template<class T,class U>
+    // struct Foo<T,U,true>
+    // {
+    //     void print()
+    //     {
+    //         printf("they are same type");
+    //     }
+    // };
 
 } 
 #endif 

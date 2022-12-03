@@ -59,7 +59,7 @@ namespace tinystl
     void iter_swap(FIter1 lhs, FIter2 rhs)
     {  
         // in util.h, use move() to do the swap
-        mystl::swap(*lhs, *rhs);
+        tinystl::swap(*lhs, *rhs);
     }
 
     //-------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ namespace tinystl
     // input_iterator_tag 
     template <class InputIter, class OutputIter>
     OutputIter unchecked_copy_cat(InputIter first, InputIter last, OutputIter result, 
-        mystl::input_iterator_tag)
+        tinystl::input_iterator_tag)
     {
         for (; first != last; ++first, ++result)
         {
@@ -79,7 +79,7 @@ namespace tinystl
     // ramdom_access_iterator_tag 
     template <class RandomIter, class OutputIter>
     OutputIter unchecked_copy_cat(RandomIter first, RandomIter last, OutputIter result,
-        mystl::random_access_iterator_tag)
+        tinystl::random_access_iterator_tag)
     {
         for (auto n = last - first; n > 0; --n, ++first, ++result)
         {
@@ -129,7 +129,7 @@ namespace tinystl
     template <class BidirectionalIter1, class BidirectionalIter2>
     BidirectionalIter2 
     unchecked_copy_backward_cat(BidirectionalIter1 first, BidirectionalIter1 last,
-        BidirectionalIter2 result, mystl::bidirectional_iterator_tag)
+        BidirectionalIter2 result, tinystl::bidirectional_iterator_tag)
     {
         while (first != last)
             *--result = *--last;
@@ -140,7 +140,7 @@ namespace tinystl
     template <class BidirectionalIter1, class BidirectionalIter2>
     BidirectionalIter2 
     unchecked_copy_backward_cat(BidirectionalIter1 first, BidirectionalIter1 last,
-        BidirectionalIter2 result, mystl::random_access_iterator_tag)
+        BidirectionalIter2 result, tinystl::random_access_iterator_tag)
     {
         for (auto n = last - first; n > 0; --n)
             *--result = *--last;
@@ -203,14 +203,14 @@ namespace tinystl
     // input_iterator_tag
     template <class InputIter, class Size, class OutputIter>
     mystl::pair<InputIter, OutputIter> unchecked_copy_n(InputIter first, Size n, 
-        OutputIter result, mystl::input_iterator_tag)
+        OutputIter result, tinystl::input_iterator_tag)
     {
         for (; n > 0; --n, ++first, ++result)
         {
             *result = *first;
         }
 
-        return mystl::pair<InputIter, OutputIter>(first, result);
+        return tinystl::pair<InputIter, OutputIter>(first, result);
     }
     // random_access_iterator_tag
     template <class RandomIter, class Size, class OutputIter>
@@ -218,7 +218,7 @@ namespace tinystl
         OutputIter result, mystl::random_access_iterator_tag)
     {
         auto last = first + n;
-        return mystl::pair<RandomIter, OutputIter>(last, mystl::copy(first, last, result));
+        return tinystl::pair<RandomIter, OutputIter>(last, mystl::copy(first, last, result));
     }
 
     template <class InputIter, class Size, class OutputIter>
@@ -233,24 +233,24 @@ namespace tinystl
     // input_iterator_tag 
     template <class InputIter, class OutputIter>
     OutputIter unchecked_move_cat(InputIter first, InputIter last,
-        OutputIter result, mystl::input_iterator_tag)
+        OutputIter result, tinystl::input_iterator_tag)
     {
         for (; first != last; ++first, ++result)
         {
             // it will be changed to be rvalue
             // don't use the copy constructor for me, use the move constructor.
-            *result = mystl::move(*first);
+            *result = tinystl::move(*first);
         }
         return result;
     }
     // ramdom_access_iterator_tag 
     template <class RandomIter, class OutputIter>
     OutputIter unchecked_move_cat(RandomIter first, RandomIter last, 
-        OutputIter result, mystl::random_access_iterator_tag)
+        OutputIter result, tinystl::random_access_iterator_tag)
     {
         for (auto n = last - first; n > 0; --n, ++first, ++result)
         {
-            *result = mystl::move(*first);
+            *result = tinystl::move(*first);
         }
         return result;
     }
@@ -286,20 +286,20 @@ namespace tinystl
     // bidirectional_iterator_tag
     template <class BidirectionalIter1, class BidirectionalIter2>
     BidirectionalIter2 unchecked_move_backward_cat(BidirectionalIter1 first, 
-        BidirectionalIter1 last, BidirectionalIter2 result, mystl::bidirectional_iterator_tag)
+        BidirectionalIter1 last, BidirectionalIter2 result, tinystl::bidirectional_iterator_tag)
     {
         while (first != last)
-            *--result = mystl::move(*--last);
+            *--result = tinystl::move(*--last);
         return result;
     }
 
     // random_access_iterator_tag
     template <class RandomIter1, class RandomIter2>
     RandomIter2 unchecked_move_backward_cat(RandomIter1 first, RandomIter1 last,
-        RandomIter2 result, mystl::random_access_iterator_tag)
+        RandomIter2 result, tinystl::random_access_iterator_tag)
     {
         for (auto n = last - first; n > 0; --n)
-            *--result = mystl::move(*--last);
+            *--result = tinystl::move(*--last);
         return result;
     }
 
@@ -404,7 +404,7 @@ namespace tinystl
     // forward_iterator_tag
     template <class ForwardIter, class T>
     void fill_cat(ForwardIter first, ForwardIter last, const T& value,
-                mystl::forward_iterator_tag)
+                tinystl::forward_iterator_tag)
     {
     for (; first != last; ++first)
     {
@@ -414,7 +414,7 @@ namespace tinystl
     // random_access_iterator_tag
     template <class RandomIter, class T>
     void fill_cat(RandomIter first, RandomIter last, const T& value,
-                mystl::random_access_iterator_tag)
+                tinystl::random_access_iterator_tag)
     {
         fill_n(first, last - first, value);
     }
@@ -477,7 +477,7 @@ namespace tinystl
         // void *memcpy(void *str1, const void *str2, size_t n) 
         // Copy n bytes from str2 to str1.
         // return a pointer to the target memory area str1.
-        const auto result = std::memcmp(first1, first2, mystl::min(len1, len2));
+        const auto result = std::memcmp(first1, first2, tinystl::min(len1, len2));
 
         // If they are equal, the longer one is bigger
         return result != 0 ? result < 0 : len1 < len2;
@@ -489,7 +489,7 @@ namespace tinystl
     // and return a pair of iterators, 
     // pointing to the mismatched elements in the two sequences respectively
     template <class InputIter1, class InputIter2>
-    mystl::pair<InputIter1, InputIter2> 
+    tinystl::pair<InputIter1, InputIter2> 
     mismatch(InputIter1 first1, InputIter1 last1, InputIter2 first2)
     {
         while (first1 != last1 && *first1 == *first2)
@@ -497,12 +497,12 @@ namespace tinystl
             ++first1;
             ++first2;
         }
-        return mystl::pair<InputIter1, InputIter2>(first1, first2);
+        return tinystl::pair<InputIter1, InputIter2>(first1, first2);
     }
 
     // overload version
     template <class InputIter1, class InputIter2, class Compred>
-    mystl::pair<InputIter1, InputIter2> 
+    tinystl::pair<InputIter1, InputIter2> 
     mismatch(InputIter1 first1, InputIter1 last1, InputIter2 first2, Compred comp)
     {
         while (first1 != last1 && comp(*first1, *first2))
@@ -510,7 +510,7 @@ namespace tinystl
             ++first1;
             ++first2;
         }
-        return mystl::pair<InputIter1, InputIter2>(first1, first2);
+        return tinystl::pair<InputIter1, InputIter2>(first1, first2);
     }
 
 } // namespace tinystl

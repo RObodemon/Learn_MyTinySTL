@@ -10,9 +10,9 @@ namespace tinystl
     // \： Represents a newline character,
     //    telling the compiler that the line has not ended
     #define MYSTL_DEBUG(expr) \
-    assert(expr)  
+    assert(expr)    
 
-    // length_error:
+    // length_error:        
     // The class serves as the base class for all exceptions thrown to
     // report an attempt to generate an object too long to be specified.
     #define THROW_LENGTH_ERROR_IF(expr, what) \
@@ -30,7 +30,7 @@ namespace tinystl
     #define THROW_RUNTIME_ERROR_IF(expr, what) \
     if ((expr)) throw std::runtime_error(what)
 
-} // namepsace tinystl
+} // namepsace mystl
 
 #endif 
 

@@ -405,7 +405,7 @@ namespace tinystl
         return !(lhs < rhs);
     }
 
-} // namespace mystl
+} // namespace tinystl
 
 #endif // !MYTINYSTL_ITERATOR_H_
 
