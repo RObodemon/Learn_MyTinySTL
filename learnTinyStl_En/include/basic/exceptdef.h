@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-namespace mystl
+namespace tinystl
 {
     // \： Represents a newline character,
     //    telling the compiler that the line has not ended
@@ -30,7 +30,7 @@ namespace mystl
     #define THROW_RUNTIME_ERROR_IF(expr, what) \
     if ((expr)) throw std::runtime_error(what)
 
-} // namepsace mystl
+} // namepsace tinystl
 
 #endif 
 
