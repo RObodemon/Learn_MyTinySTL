@@ -33,7 +33,7 @@
 // Used to achieve positioning and construction. 
 // After obtaining a piece of memory that can accommodate objects of the specified type, 
 // construct an object on this piece of memory.
-namespace mystl
+namespace tinystl
 {                
     // construct: use placement new
     template <class Ty>
@@ -96,7 +96,7 @@ namespace mystl
             destroy(&*first);
     }
 
-} // namespace mystl
+} // namespace tinystl
 
 #ifdef _MSC_VER
 // It is to restore the original warning state.
