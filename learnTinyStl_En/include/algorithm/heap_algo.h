@@ -45,14 +45,14 @@ namespace tinystl
     template <class RandomIter, class Distance>
     void push_heap_d(RandomIter first, RandomIter last, Distance*)
     {
-        mystl::push_heap_aux(first, (last - first) - 1, static_cast<Distance>(0), *(last - 1));
+        tinystl::push_heap_aux(first, (last - first) - 1, static_cast<Distance>(0), *(last - 1));
     }
 
     template <class RandomIter>
     void push_heap(RandomIter first, RandomIter last)
     { 
         // The new element should have been placed at the very end of the bottom container
-        mystl::push_heap_d(first, last, distance_type(first));
+        tinystl::push_heap_d(first, last, distance_type(first));
     }
 
     // overload version: comp()
@@ -75,14 +75,14 @@ namespace tinystl
     template <class RandomIter, class Compared, class Distance>
     void push_heap_d(RandomIter first, RandomIter last, Distance*, Compared comp)
     {
-        mystl::push_heap_aux(first, (last - first) - 1, static_cast<Distance>(0),
+        tinystl::push_heap_aux(first, (last - first) - 1, static_cast<Distance>(0),
             *(last - 1), comp);
     }
 
     template <class RandomIter, class Compared>
     void push_heap(RandomIter first, RandomIter last, Compared comp)
     {
-        mystl::push_heap_d(first, last, distance_type(first), comp);
+        tinystl::push_heap_d(first, last, distance_type(first), comp);
     }
 
     //-----------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ namespace tinystl
             holeIndex = rchild - 1;
         }
         // percolate up: push the last value in
-        mystl::push_heap_aux(first, holeIndex, topIndex, value);
+        tinystl::push_heap_aux(first, holeIndex, topIndex, value);
     }
 
     template <class RandomIter, class T, class Distance>
@@ -129,13 +129,13 @@ namespace tinystl
         // then make [first, last - 1) it a max-heap again
         // result = last-1
         *result = *first;
-        mystl::adjust_heap(first, static_cast<Distance>(0), last - first, value);
+        tinystl::adjust_heap(first, static_cast<Distance>(0), last - first, value);
     }
 
     template <class RandomIter>
     void pop_heap(RandomIter first, RandomIter last)
     {
-        mystl::pop_heap_aux(first, last - 1, last - 1, *(last - 1), distance_type(first));
+        tinystl::pop_heap_aux(first, last - 1, last - 1, *(last - 1), distance_type(first));
     }
 
     // overload version
@@ -159,7 +159,7 @@ namespace tinystl
             holeIndex = rchild - 1;
         }
         // percolate up
-        mystl::push_heap_aux(first, holeIndex, topIndex, value, comp);
+        tinystl::push_heap_aux(first, holeIndex, topIndex, value, comp);
     }
 
     template <class RandomIter, class T, class Distance, class Compared>
@@ -167,13 +167,13 @@ namespace tinystl
                     T value, Distance*, Compared comp)
     {
         *result = *first; 
-        mystl::adjust_heap(first, static_cast<Distance>(0), last - first, value, comp);
+        tinystl::adjust_heap(first, static_cast<Distance>(0), last - first, value, comp);
     }
 
     template <class RandomIter, class Compared>
     void pop_heap(RandomIter first, RandomIter last, Compared comp)
     {
-        mystl::pop_heap_aux(first, last - 1, last - 1, *(last - 1),
+        tinystl::pop_heap_aux(first, last - 1, last - 1, *(last - 1),
             distance_type(first), comp);
     }
 
@@ -186,7 +186,7 @@ namespace tinystl
     {
         while (last - first > 1)
         {
-            mystl::pop_heap(first, last--);
+            tinystl::pop_heap(first, last--);
         }
     }
 
@@ -196,7 +196,7 @@ namespace tinystl
     {
         while (last - first > 1)
         {
-            mystl::pop_heap(first, last--, comp);
+            tinystl::pop_heap(first, last--, comp);
         }
     }
 
@@ -213,7 +213,7 @@ namespace tinystl
         auto holeIndex = (len - 2) / 2;
         while (true)
         {
-            mystl::adjust_heap(first, holeIndex, len, *(first + holeIndex));
+            tinystl::adjust_heap(first, holeIndex, len, *(first + holeIndex));
             if (holeIndex == 0)
                 return;
             holeIndex--;
@@ -224,7 +224,7 @@ namespace tinystl
     void make_heap(RandomIter first, RandomIter last)
     {
         // extract type
-        mystl::make_heap_aux(first, last, distance_type(first));;
+        tinystl::make_heap_aux(first, last, distance_type(first));;
     }
 
     // overload
@@ -237,7 +237,7 @@ namespace tinystl
         auto holeIndex = (len - 2) / 2;
         while (true)
         {
-            mystl::adjust_heap(first, holeIndex, len, *(first + holeIndex), comp);
+            tinystl::adjust_heap(first, holeIndex, len, *(first + holeIndex), comp);
             if (holeIndex == 0)
             return;
             holeIndex--;
@@ -247,7 +247,7 @@ namespace tinystl
     template <class RandomIter, class Compared>
     void make_heap(RandomIter first, RandomIter last, Compared comp)
     {
-        mystl::make_heap_aux(first, last, distance_type(first), comp);
+        tinystl::make_heap_aux(first, last, distance_type(first), comp);
     }
 
 } // namespace tinystl

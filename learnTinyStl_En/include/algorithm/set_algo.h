@@ -44,7 +44,7 @@ namespace tinystl
             ++result;
         }
         // copy the left elements which might be in the [first1,last1) or [first2,last2)
-        return mystl::copy(first2, last2, mystl::copy(first1, last1, result));
+        return tinystl::copy(first2, last2, tinystl::copy(first1, last1, result));
     }
 
     // overload version
@@ -72,7 +72,7 @@ namespace tinystl
             }
             ++result;
         }
-        return mystl::copy(first2, last2, mystl::copy(first1, last1, result));
+        return tinystl::copy(first2, last2, tinystl::copy(first1, last1, result));
     }
 
     //------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ namespace tinystl
             }
         }
         // for the right situation
-        return mystl::copy(first1, last1, result);
+        return tinystl::copy(first1, last1, result);
     }
 
     // overload version
@@ -188,7 +188,7 @@ namespace tinystl
                 ++first2;
             }
         }
-        return mystl::copy(first1, last1, result);
+        return tinystl::copy(first1, last1, result);
     }
 
     //------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ namespace tinystl
                 ++first2;
             }
         }
-        return mystl::copy(first2, last2, mystl::copy(first1, last1, result));
+        return tinystl::copy(first2, last2, tinystl::copy(first1, last1, result));
     }
 
     // overload version
@@ -249,7 +249,7 @@ namespace tinystl
                 ++first2;
             }
         }
-        return mystl::copy(first2, last2, mystl::copy(first1, last1, result));
+        return tinystl::copy(first2, last2, tinystl::copy(first1, last1, result));
     }
 
 } // namespace tinystl

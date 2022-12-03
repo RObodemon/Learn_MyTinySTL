@@ -1,7 +1,7 @@
 #ifndef NUMERIC_H_
 #define NUMERIC_H_
 
-// numeric calculation
+// numerica calculation
 // accumulate:          accumulation algorithm (overloaded, function object)
 // adjacent_difference: Calculate the adjacent difference (overloaded, function object)
 // inner_product:       calculates the product of two intervals (overloaded, two function objects)

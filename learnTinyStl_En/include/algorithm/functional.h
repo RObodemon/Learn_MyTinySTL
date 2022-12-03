@@ -240,12 +240,12 @@ namespace tinystl
     //---------------------------------------------------------------------------------
     // hash functor
 
-    // 对于大部分类型，hash function 什么都不做
+    // For most types, the hash function does nothing
     template <class Key>
     struct hash 
     {};
 
-    // 针对指针的偏特化版本
+    // A partial specialization for pointers
     template <class T>
     struct hash<T*>
     {
