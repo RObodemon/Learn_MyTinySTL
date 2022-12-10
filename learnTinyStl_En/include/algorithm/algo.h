@@ -289,4 +289,223 @@ namespace tinystl
             return last;
         }
     }
+	
+	//-------------------------------------------------------------------------------------
+    // find_end
+    // Find the last occurrence of [first2, last2) in the interval [first1, last1), 
+    // if it does not exist, return last1
+
+    // find_end_dispatch's forward_iterator_tag version
+    template <class ForwardIter1, class ForwardIter2>
+    ForwardIter1 find_end_dispatch(ForwardIter1 first1, ForwardIter1 last1,
+        ForwardIter2 first2, ForwardIter2 last2,
+        forward_iterator_tag, forward_iterator_tag)
+    {
+        if (first2 == last2)
+            return last1;
+        else
+        {
+            auto result = last1;
+            while (true)
+            {
+                // search the first occurence
+                auto new_result = tinystl::search(first1, last1, first2, last2);
+                if (new_result == last1)
+                    return result;
+                else
+                {
+                    result = new_result;
+                    // update first1, used to find next [first2, last2)
+                    first1 = new_result;
+                    ++first1;
+                }
+            }
+        }
+    }
+
+    // find_end_dispatch's bidirectional_iterator_tag version
+    template <class BidirectionalIter1, class BidirectionalIter2>
+    BidirectionalIter1 find_end_dispatch(BidirectionalIter1 first1, BidirectionalIter1 last1,
+        BidirectionalIter2 first2, BidirectionalIter2 last2,
+        bidirectional_iterator_tag, bidirectional_iterator_tag)
+    {
+        typedef reverse_iterator<BidirectionalIter1> revIter1;
+        typedef reverse_iterator<BidirectionalIter2> revIter2;
+        revIter1 rlast1(first1);
+        revIter2 rlast2(first2);
+        // search in reverse
+        revIter1 rResult = tinystl::search(revIter1(last1), rlast1, revIter2(last2), rlast2);
+
+        if (rResult == rlast1)
+            return last1;
+        else
+        {
+            auto result = rResult.base(); // return current
+            // return the true position in [first1, last1)
+            tinystl::advance(result, -tinystl::distance(first2, last2));
+            return result;
+        }
+    }
+
+    template <class ForwardIter1, class ForwardIter2>
+    ForwardIter1 find_end(ForwardIter1 first1, ForwardIter1 last1,
+        ForwardIter2 first2, ForwardIter2 last2)
+    {
+        // extract the iterator type
+        typedef typename iterator_traits<ForwardIter1>::iterator_category Category1;
+        typedef typename iterator_traits<ForwardIter2>::iterator_category Category2;
+
+        return tinystl::find_end_dispatch(first1, last1, first2, last2,
+            Category1(), Category2());
+    }
+
+    // function object comp
+    // find_end_dispatch's forward_iterator_tag version
+    template <class ForwardIter1, class ForwardIter2, class Compared>
+    ForwardIter1 find_end_dispatch(ForwardIter1 first1, ForwardIter1 last1,
+        ForwardIter2 first2, ForwardIter2 last2,
+        forward_iterator_tag, forward_iterator_tag, Compared comp)
+    {
+        if (first2 == last2)
+            return last1;
+        else
+        {
+            auto result = last1;
+            while (true)
+            {
+                auto new_result = tinystl::search(first1, last1, first2, last2, comp);
+                if (new_result == last1)
+                    return result;
+                else
+                {
+                    result = new_result;
+                    first1 = new_result;
+                    ++first1;
+                }
+            }
+        }
+    }
+
+    // find_end_dispatch's bidirectional_iterator_tag version
+    template <class BidirectionalIter1, class BidirectionalIter2, class Compared>
+    BidirectionalIter1 find_end_dispatch(BidirectionalIter1 first1, BidirectionalIter1 last1,
+        BidirectionalIter2 first2, BidirectionalIter2 last2,
+        bidirectional_iterator_tag, bidirectional_iterator_tag, Compared comp)
+    {
+        typedef reverse_iterator<BidirectionalIter1> reviter1;
+        typedef reverse_iterator<BidirectionalIter2> reviter2;
+        reviter1 rlast1(first1);
+        reviter2 rlast2(first2);
+        reviter1 rresult = tinystl::search(reviter1(last1), rlast1, 
+            reviter2(last2), rlast2, comp);
+
+        if (rresult == rlast1)
+            return last1;
+        else
+        {
+            auto result = rresult.base();
+            tinystl::advance(result, -tinystl::distance(first2, last2));
+            return result;
+        }
+    }
+
+    template <class ForwardIter1, class ForwardIter2, class Compared>
+    ForwardIter1 find_end(ForwardIter1 first1, ForwardIter1 last1,
+        ForwardIter2 first2, ForwardIter2 last2, Compared comp)
+    {
+        typedef typename iterator_traits<ForwardIter1>::iterator_category Category1;
+        typedef typename iterator_traits<ForwardIter2>::iterator_category Category2;
+        return tinystl::find_end_dispatch(first1, last1, first2, last2, 
+            Category1(), Category2(), comp);
+    }
+
+    //-------------------------------------------------------------------------------------
+    // find_first_of
+    // Find some elements in [first2, last2) in [first1, last1), 
+    // and return an iterator pointing to the element that appears for the first time
+    template <class InputIter, class ForwardIter>
+    InputIter find_first_of(InputIter first1, InputIter last1,
+        ForwardIter first2, ForwardIter last2)
+    {
+        // this is not a goog algorithm
+        for (; first1 != last1; ++first1)
+        {
+            for (auto iter = first2; iter != last2; ++iter)
+            {
+                if (*first1 == *iter)
+                    return first1;
+            }
+        }
+        return last1;
+    }
+
+    // comp
+    template <class InputIter, class ForwardIter, class Compared>
+    InputIter find_first_of(InputIter first1, InputIter last1,
+        ForwardIter first2, ForwardIter last2, Compared comp)
+    {
+        for (; first1 != last1; ++first1)
+        {
+            for (auto iter = first2; iter != last2; ++iter)
+            {
+                if (comp(*first1, *iter))
+                    return first1;
+            }
+        }
+        return last1;
+    }
+
+    //-------------------------------------------------------------------------------------
+    // for_each: f() used to return a value
+    // Use a function object f to perform an operator() operation 
+    // on each element in the [first, last) range, 
+    // but the element content cannot be changed
+    template <class InputIter, class Function>
+    Function for_each(InputIter first, InputIter last, Function f)
+    {
+        for (; first != last; ++first)
+        {
+            f(*first);
+        }
+        return f;
+    }
+
+    //-------------------------------------------------------------------------------------
+    // adjacent_find
+    // Find the first pair of adjacent elements that match, use operator==  by default, 
+    // return an iterator if found, pointer to the first element of the pair
+    template <class ForwardIter>
+    ForwardIter adjacent_find(ForwardIter first, ForwardIter last)
+    {
+        if (first == last)  
+            return last;
+
+        auto next = first;
+        while (++next != last)
+        {
+            if (*first == *next)  
+                return first;
+
+            first = next;
+        }
+        return last;
+    }
+
+    // comp
+    template <class ForwardIter, class Compared>
+    ForwardIter adjacent_find(ForwardIter first, ForwardIter last, Compared comp)
+    {
+        if (first == last) 
+            return last;
+
+        auto next = first;
+        while (++next != last)
+        {
+            if (comp(*first, *next)) 
+                return first;
+
+            first = next;
+        }
+        return last;
+    }
 }
