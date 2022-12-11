@@ -508,4 +508,506 @@ namespace tinystl
         }
         return last;
     }
+
+    //=====================================================================================
+
+    //-------------------------------------------------------------------------------------
+    // lower_bound
+    // Find the first element in [first, last), which is not less than the given value
+    // and return an iterator pointing to it, or return last if there is none
+    // the elements in [first, last) are arranged in ascending order
+
+    // lbound_dispatch's forward_iterator_tag version
+    template <class ForwardIter, class T>
+    ForwardIter lbound_dispatch(ForwardIter first, ForwardIter last,
+        const T& value, forward_iterator_tag)
+    {
+        // binary search
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle;
+
+        while (len > 0)
+        {
+            // >> : divided by 2
+            // << : multiplied by 2
+            half = len >> 1; 
+            middle = first;
+            // middle = middle + half
+            tinystl::advance(middle, half);
+            if (*middle < value)
+            {
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+            else
+                len = half;
+        }
+        return first;
+    }
+
+    // lbound_dispatch's random_access_iterator_tag version
+    // no need to use advance() function
+    template <class RandomIter, class T>
+    RandomIter lbound_dispatch(RandomIter first, RandomIter last,
+        const T& value, random_access_iterator_tag)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (*middle < value)
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+            else
+                len = half;
+        }
+        return first;
+    }
+
+    template <class ForwardIter, class T>
+    ForwardIter lower_bound(ForwardIter first, ForwardIter last, const T& value)
+    {
+        return tinystl::lbound_dispatch(first, last, value, iterator_category(first));
+    }
+
+    // comp
+    // lbound_dispatch's forward_iterator_tag version
+    template <class ForwardIter, class T, class Compared>
+    ForwardIter lbound_dispatch(ForwardIter first, ForwardIter last,
+        const T& value, forward_iterator_tag, Compared comp)
+    {
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first;
+            tinystl::advance(middle, half);
+            if (comp(*middle, value))
+            {
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+            else
+                len = half;
+        }
+        return first;
+    }
+
+    // lbound_dispatch's random_access_iterator_tag version
+    template <class RandomIter, class T, class Compared>
+    RandomIter lbound_dispatch(RandomIter first, RandomIter last,
+        const T& value, random_access_iterator_tag, Compared comp)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (comp(*middle, value))
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+            else
+                len = half;
+        }
+        return first;
+    }
+
+    template <class ForwardIter, class T, class Compared>
+    ForwardIter lower_bound(ForwardIter first, ForwardIter last, const T& value, 
+        Compared comp)
+    {
+        return tinystl::lbound_dispatch(first, last, value, iterator_category(first), comp);
+    }
+
+    //-------------------------------------------------------------------------------------
+    // upper_bound
+    // find the first element in [first, last), which is bigger than value,
+    // and return the iterator pointint to it,
+    // or return last if none
+
+    // ubound_dispatch's forward_iterator_tag version
+    template <class ForwardIter, class T>
+    ForwardIter ubound_dispatch(ForwardIter first, ForwardIter last,
+        const T& value, forward_iterator_tag)
+    {
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first;
+            tinystl::advance(middle, half);
+            if (*middle>value)
+                len = half; // len + 1 := a new last for previous part.
+            else
+            {
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+        }
+        return first;
+    }
+
+    // ubound_dispatch's random_access_iterator_tag version
+    template <class RandomIter, class T>
+    RandomIter ubound_dispatch(RandomIter first, RandomIter last,
+        const T& value, random_access_iterator_tag)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (*middle>value)
+                len = half;
+            else
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+        }
+        return first;
+    }
+
+    template <class ForwardIter, class T>
+    ForwardIter upper_bound(ForwardIter first, ForwardIter last, const T& value)
+    {
+        return tinystl::ubound_dispatch(first, last, value, iterator_category(first));
+    }
+
+    // comp
+    // ubound_dispatch's forward_iterator_tag version
+    template <class ForwardIter, class T, class Compared>
+    ForwardIter ubound_dispatch(ForwardIter first, ForwardIter last,
+        const T& value, forward_iterator_tag, Compared comp)
+    {
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first;
+            tinystl::advance(middle, half);
+            if (comp(value, *middle))
+                len = half;
+            else
+            {
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+        }
+        return first;
+    }
+
+    // ubound_dispatch's random_access_iterator_tag version
+    template <class RandomIter, class T, class Compared>
+    RandomIter ubound_dispatch(RandomIter first, RandomIter last,
+        const T& value, random_access_iterator_tag, Compared comp)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (comp(value, *middle)) 
+                len = half;
+            else
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+        }
+        return first;
+    }
+
+    template <class ForwardIter, class T, class Compared>
+    ForwardIter upper_bound(ForwardIter first, ForwardIter last, const T& value, 
+        Compared comp)
+    {
+        return tinystl::ubound_dispatch(first, last, value, iterator_category(first), comp);
+    }
+
+    //-------------------------------------------------------------------------------------
+    // binary_search
+    // if there is an element equal to value in [first, last), 
+    // return true, otherwise return false
+    template <class ForwardIter, class T>
+    bool binary_search(ForwardIter first, ForwardIter last, const T& value)
+    {
+        auto i = tinystl::lower_bound(first, last, value);
+        return i != last && !(value < *i);
+    }
+
+    // comp
+    template <class ForwardIter, class T, class Compared>
+    bool binary_search(ForwardIter first, ForwardIter last, const T& value, Compared comp)
+    {
+        auto i = tinystl::lower_bound(first, last, value);
+        return i != last && !comp(value, *i);
+    }
+
+    //-------------------------------------------------------------------------------------
+    // equal_range
+    // 查找[first,last)区间中与 value 相等的元素所形成的区间，返回一对迭代器指向区间首尾
+    // 第一个迭代器指向第一个不小于 value 的元素，第二个迭代器指向第一个大于 value 的元素
+
+    // erange_dispatch 的 forward_iterator_tag 版本
+    template <class ForwardIter, class T>
+    tinystl::pair<ForwardIter, ForwardIter> erange_dispatch(ForwardIter first, 
+        ForwardIter last, const T& value, forward_iterator_tag)
+    {
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle, left, right;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first;
+            tinystl::advance(middle, half);
+            if (*middle < value)
+            {
+                // find in the right part
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+            else if (*middle > value)
+                len = half; // find in the left part
+            else
+            {
+                // why last cannot be middle
+                left = tinystl::lower_bound(first, last, value);
+                tinystl::advance(first, len);
+                // reduce the range for search
+                right = tinystl::upper_bound(++middle, first, value);
+                return tinystl::pair<ForwardIter, ForwardIter>(left, right);
+            }
+        }
+        return tinystl::pair<ForwardIter, ForwardIter>(last, last);
+    }
+
+    // erange_dispatch's random_access_iterator_tag version
+    template <class RandomIter, class T>
+    tinystl::pair<RandomIter, RandomIter>erange_dispatch(RandomIter first, RandomIter last,
+        const T& value, random_access_iterator_tag)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle, left, right;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (*middle < value)
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+            else if (value < *middle)
+                len = half;
+            else
+            {
+                left = tinystl::lower_bound(first, middle, value);
+                right = tinystl::upper_bound(++middle, first + len, value);
+                return tinystl::pair<RandomIter, RandomIter>(left, right);
+            }
+        }
+        return tinystl::pair<RandomIter, RandomIter>(last, last);
+    }
+
+    template <class ForwardIter, class T>
+    tinystl::pair<ForwardIter, ForwardIter> equal_range(ForwardIter first, 
+        ForwardIter last, const T& value)
+    {
+        return tinystl::erange_dispatch(first, last, value, iterator_category(first));
+    }
+
+    // comp
+    // erange_dispatch's forward iterator version
+    template <class ForwardIter, class T, class Compared>
+    tinystl::pair<ForwardIter, ForwardIter>erange_dispatch(ForwardIter first, 
+        ForwardIter last, const T& value, forward_iterator_tag, Compared comp)
+    {
+        auto len = tinystl::distance(first, last);
+        auto half = len;
+        ForwardIter middle, left, right;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first;
+            tinystl::advance(middle, half);
+            if (comp(*middle, value))
+            {
+                first = middle;
+                ++first;
+                len = len - half - 1;
+            }
+            else if (comp(value, *middle))
+                len = half;
+            else
+            {
+                left = tinystl::lower_bound(first, last, value, comp);
+                tinystl::advance(first, len);
+                right = tinystl::upper_bound(++middle, first, value, comp);
+                return tinystl::pair<ForwardIter, ForwardIter>(left, right);
+            }
+        }
+        return tinystl::pair<ForwardIter, ForwardIter>(last, last);
+    }
+
+    // erange_dispatch's random access iterator version
+    template <class RandomIter, class T, class Compared>
+    tinystl::pair<RandomIter, RandomIter>
+    erange_dispatch(RandomIter first, RandomIter last,
+                    const T& value, random_access_iterator_tag, Compared comp)
+    {
+        auto len = last - first;
+        auto half = len;
+        RandomIter middle, left, right;
+        while (len > 0)
+        {
+            half = len >> 1;
+            middle = first + half;
+            if (comp(*middle, value))
+            {
+                first = middle + 1;
+                len = len - half - 1;
+            }
+            else if (comp(value, *middle))
+                len = half;
+            else
+            {
+                left = tinystl::lower_bound(first, middle, value, comp);
+                right = tinystl::upper_bound(++middle, first + len, value, comp);
+                return tinystl::pair<RandomIter, RandomIter>(left, right);
+            }
+        }
+        return tinystl::pair<RandomIter, RandomIter>(last, last);
+    }
+
+    template <class ForwardIter, class T, class Compared>
+    tinystl::pair<ForwardIter, ForwardIter>equal_range(ForwardIter first, 
+        ForwardIter last, const T& value, Compared comp)
+    {
+        return tinystl::erange_dispatch(first, last, value, iterator_category(first), comp);
+    }
+
+    //=====================================================================================
+
+    //-------------------------------------------------------------------------------------
+    // generate
+    // Assign the operation result of the function object gen 
+    // to each element in [first, last)
+    template <class ForwardIter, class Generator>
+    void generate(ForwardIter first, ForwardIter last, Generator gen)
+    {
+        for (; first != last; ++first)
+            *first = gen();
+    }
+
+    //-------------------------------------------------------------------------------------
+    // generate_n
+    // Assign the operatioon result of the function object gen
+    // n elements consecutively
+    template <class ForwardIter, class Size, class Generator>
+    void generate_n(ForwardIter first, Size n, Generator gen)
+    {
+        for (; n > 0; --n, ++first)
+            *first = gen();
+    }
+
+    //-------------------------------------------------------------------------------------
+    // includes
+    // 判断序列一S1 是否包含序列二S2
+    template <class InputIter1, class InputIter2>
+    bool includes(InputIter1 first1, InputIter1 last1,InputIter2 first2, InputIter2 last2)
+    {
+        // make sure every element in [first2, last2) in [first1, last1)
+        while (first1 != last1 && first2 != last2)
+        {
+            if (*first2 < *first1)
+                return false;
+            else if (*first1 < *first2)
+                ++first1;
+            else
+                ++first1, ++first2;
+        }
+        return first2 == last2;
+    }
+
+    // comp
+    template <class InputIter1, class InputIter2, class Compared>
+    bool includes(InputIter1 first1, InputIter1 last1,
+                InputIter2 first2, InputIter2 last2, Compared comp)
+    {
+        while (first1 != last1 && first2 != last2)
+        {
+            if (comp(*first2, *first1))
+                return false;
+            else if (comp(*first1, *first2))
+                ++first1;
+            else
+                ++first1, ++first2;
+        }
+        return first2 == last2;
+    }
+
+    //-------------------------------------------------------------------------------------
+    // is_heap (Min-heap)
+    // Check if the elements in [first, last) are a heap, if so, return true
+    template <class RandomIter>
+    bool is_heap(RandomIter first, RandomIter last)
+    {
+        auto n = tinystl::distance(first, last);
+        auto parent = 0;
+        for (auto child = 1; child < n; ++child)
+        {
+            if (first[parent] < first[child])
+                return false;
+
+            // x & 1 is equivalent to x % 2.
+            // determine the child node is wheather in the last left in this line.
+            if ((child & 1) == 0)
+                ++parent;
+        }
+        return true;
+    }
+
+    // comp
+    template <class RandomIter, class Compared>
+    bool is_heap(RandomIter first, RandomIter last, Compared comp)
+    {
+	    auto n = tinystl::distance(first, last);
+	    auto parent = 0;
+	    for (auto child = 1; child < n; ++child)
+	    {
+		if (comp(first[parent], first[child]))
+			return false;
+		if ((child & 1) == 0)
+			++parent;
+	    }
+	    return true;
+    }
 }
