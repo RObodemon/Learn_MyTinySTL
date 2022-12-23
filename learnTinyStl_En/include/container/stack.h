@@ -5,6 +5,9 @@
 // adapter, which gather an underlying container inside 
 // and modify the container's representation by changing the interface.
 
+// Both list and deque can be used as the underlying services of these two
+// And neither of these provide iterators, so they cannot be traversed
+
 // The stack does not implement any functions by itself, 
 // all of them are the functions of the container c_ used.
 
