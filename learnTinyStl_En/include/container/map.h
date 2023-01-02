@@ -1,16 +1,15 @@
-#ifndef _SET_H_
-#define _SET_H_
+#ifndef _MAP_H_
+#define _MAP_H_
 
-// set      : the key value is a real value, 
-//            the elements in the collection will be automatically sorted, 
-//            and the key value does not allow duplication
-// multiset : The key value is a real value, 
-//            the elements in the collection will be automatically sorted, 
+// map      : Elements have key values and real values, 
+//            which will be automatically sorted according to the size of the key values. 
+//            Duplicate key values are not allowed
+// multimap : Elements have key values and real values, 
+//            which will be automatically sorted according to the size of the key value, 
 //            and the key value is allowed to be repeated
 
-// notes:
 // Exception guarantees:
-// tinystl::set<Key> / tinystl::multiset<Key> 
+// tinystl::map<Key, T> / tinystl::multimap<Key, T> 
 // Satisfy the basic exception guarantee, 
 // and strengthen the exception safety guarantee for the following functions:
 //   * emplace
@@ -22,36 +21,50 @@
 namespace tinystl
 {
     //======================================================================================
-    // set
     // first parameter: key type
-    // second parameter: key comparison, default: tinystl::less 
-    template <class Key, class Compare = tinystl::less<Key>>
-    class set
+    // second parameter: value type
+    // third parameter: key comparison method, default: tinystl::less
+    template <class Key, class T, class Compare = tinystl::less<Key>>
+    class map
     {
     public:
-        typedef Key        key_type;
-        typedef Key        value_type;
-        typedef Compare    key_compare;
-        typedef Compare    value_compare;
+        typedef Key                             key_type;
+        typedef T                               mapped_type;
+        typedef tinystl::pair<const Key, T>     value_type;
+        typedef Compare                         key_compare;
+
+        // functor，used to compare the element
+        class value_compare : public binary_function <value_type, value_type, bool>
+        {
+            friend class map<Key, T, Compare>;
+        private:
+            Compare comp;
+            value_compare(Compare c) : comp(c) {}
+        public:
+            bool operator()(const value_type& lhs, const value_type& rhs) const
+            {
+                return comp(lhs.first, rhs.first);
+            }
+        };
 
     private:
-        // tinystl::rb_tree
+        // rb_tree
         typedef tinystl::rb_tree<value_type, key_compare>  base_type;
         base_type tree_;
 
     public:
         typedef typename base_type::node_type              node_type;
 
-        typedef typename base_type::const_pointer          pointer;
+        typedef typename base_type::pointer                pointer;
         typedef typename base_type::const_pointer          const_pointer;
 
-        typedef typename base_type::const_reference        reference;
+        typedef typename base_type::reference              reference;
         typedef typename base_type::const_reference        const_reference;
 
-        typedef typename base_type::const_iterator         iterator;
+        typedef typename base_type::iterator               iterator;
         typedef typename base_type::const_iterator         const_iterator;
 
-        typedef typename base_type::const_reverse_iterator reverse_iterator;
+        typedef typename base_type::reverse_iterator       reverse_iterator;
         typedef typename base_type::const_reverse_iterator const_reverse_iterator;
 
         typedef typename base_type::size_type              size_type;
@@ -60,36 +73,38 @@ namespace tinystl
 
     public:
         // constructor
-        set() = default;
+        map() = default;
 
         template <class InputIterator>
-        set(InputIterator first, InputIterator last): tree_() 
+        map(InputIterator first, InputIterator last): tree_()
         { tree_.insert_unique(first, last); }
 
-        set(std::initializer_list<value_type> ilist): tree_()
+        map(std::initializer_list<value_type> ilist): tree_()
         { tree_.insert_unique(ilist.begin(), ilist.end()); }
 
         // copy constructor
-        set(const set& rhs): tree_(rhs.tree_)
+        map(const map& rhs): tree_(rhs.tree_) 
         {}
         
         // move constructor
-        set(set&& rhs) noexcept: tree_(tinystl::move(rhs.tree_))
+        map(map&& rhs) noexcept: tree_(tinystl::move(rhs.tree_))
         {}
 
         // copy assignment
-        set& operator=(const set& rhs)
-        {
-            tree_ = rhs.tree_;
+        map& operator=(const map& rhs)
+        { 
+            tree_ = rhs.tree_; 
             return *this;
         }
         // move assignment
-        set& operator=(set&& rhs)
+        map& operator=(map&& rhs)
         { 
-            tree_ = tinystl::move(rhs.tree_); 
-            return *this; 
+            tree_ = tinystl::move(rhs.tree_);
+            return *this;
         }
-        set& operator=(std::initializer_list<value_type> ilist)
+
+        // assignment
+        map& operator=(std::initializer_list<value_type> ilist)
         {
             tree_.clear();
             tree_.insert_unique(ilist.begin(), ilist.end());
@@ -101,12 +116,11 @@ namespace tinystl
         { return tree_.key_comp(); }
 
         value_compare value_comp() const 
-        { return tree_.key_comp(); }
+        { return value_compare(tree_.key_comp()); }
 
         allocator_type get_allocator() const 
         { return tree_.get_allocator(); }
 
-        // iterator related operations
         iterator begin() noexcept
         { return tree_.begin(); }
 
@@ -122,7 +136,7 @@ namespace tinystl
         reverse_iterator rbegin() noexcept
         { return reverse_iterator(end()); }
 
-        const_reverse_iterator rbegin()  const noexcept
+        const_reverse_iterator rbegin() const noexcept
         { return const_reverse_iterator(end()); }
 
         reverse_iterator rend() noexcept
@@ -140,7 +154,7 @@ namespace tinystl
         const_reverse_iterator crbegin() const noexcept
         { return rbegin(); }
 
-        const_reverse_iterator crend() const noexcept
+        const_reverse_iterator crend()   const noexcept
         { return rend(); }
 
         // container related operations
@@ -152,6 +166,43 @@ namespace tinystl
 
         size_type max_size() const noexcept 
         { return tree_.max_size(); }
+
+        // visit element
+        // if there is no key,
+        // throw an exception
+        mapped_type& at(const key_type& key)
+        {
+            iterator it = lower_bound(key);
+            // it->first >= key
+            THROW_OUT_OF_RANGE_IF(it == end() || key_comp()(it->first, key),
+                                "map<Key, T> no such element exists");
+            return it->second;
+        }
+        const mapped_type& at(const key_type& key) const
+        {
+            const_iterator it = lower_bound(key);
+            // it->first >= key
+            THROW_OUT_OF_RANGE_IF(it == end() || key_comp()(it->first, key),
+                                "map<Key, T> no such element exists");
+            return it->second;
+        }
+
+        mapped_type& operator[](const key_type& key)
+        {
+            iterator it = lower_bound(key);
+            // it->first >= key
+            if (it == end() || key_comp()(key, it->first))
+                it = emplace_hint(it, key, T{});
+            return it->second;
+        }
+        mapped_type& operator[](key_type&& key)
+        {
+            iterator it = lower_bound(key);
+            // it->first >= key
+            if (it == end() || key_comp()(key, it->first))
+                it = emplace_hint(it, tinystl::move(key), T{});
+            return it->second;
+        }
 
         template <class ...Args>
         pair<iterator, bool> emplace(Args&& ...args)
@@ -192,13 +243,13 @@ namespace tinystl
         void erase(iterator position)             
         { tree_.erase(position); }
 
-        size_type erase(const key_type& key)           
+        size_type erase(const key_type& key) 
         { return tree_.erase_unique(key); }
 
         void erase(iterator first, iterator last) 
         { tree_.erase(first, last); }
 
-        void clear() 
+        void clear()                              
         { tree_.clear(); }
 
         iterator find(const key_type& key)              
@@ -222,98 +273,110 @@ namespace tinystl
         const_iterator upper_bound(const key_type& key) const 
         { return tree_.upper_bound(key); }
 
-        pair<iterator, iterator> equal_range(const key_type& key)
+        pair<iterator, iterator> equal_range(const key_type& key) 
         { return tree_.equal_range_unique(key); }
 
-        pair<const_iterator, const_iterator> equal_range(const key_type& key) const
+        pair<const_iterator, const_iterator> equal_range(const key_type& key) const 
         { return tree_.equal_range_unique(key); }
 
-        void swap(set& rhs) noexcept
+        void swap(map& rhs) noexcept
         { tree_.swap(rhs.tree_); }
 
     public:
-        friend bool operator==(const set& lhs, const set& rhs) 
+        friend bool operator==(const map& lhs, const map& rhs) 
         { return lhs.tree_ == rhs.tree_; }
 
-        friend bool operator< (const set& lhs, const set& rhs) 
+        friend bool operator< (const map& lhs, const map& rhs) 
         { return lhs.tree_ <  rhs.tree_; }
     };
 
-    // overload comparison operations
-    template <class Key, class Compare>
-    bool operator==(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator==(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return lhs == rhs;
     }
 
-    template <class Key, class Compare>
-    bool operator<(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator<(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return lhs < rhs;
     }
 
-    template <class Key, class Compare>
-    bool operator!=(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator!=(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return !(lhs == rhs);
     }
 
-    template <class Key, class Compare>
-    bool operator>(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator>(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return rhs < lhs;
     }
 
-    template <class Key, class Compare>
-    bool operator<=(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator<=(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return !(rhs < lhs);
     }
 
-    template <class Key, class Compare>
-    bool operator>=(const set<Key, Compare>& lhs, const set<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator>=(const map<Key, T, Compare>& lhs, const map<Key, T, Compare>& rhs)
     {
         return !(lhs < rhs);
     }
 
     // swap
-    template <class Key, class Compare>
-    void swap(set<Key, Compare>& lhs, set<Key, Compare>& rhs) noexcept
+    template <class Key, class T, class Compare>
+    void swap(map<Key, T, Compare>& lhs, map<Key, T, Compare>& rhs) noexcept
     {
-    lhs.swap(rhs);
+        lhs.swap(rhs);
     }
 
     //======================================================================================
-    // multiset
     // first parameter: key type
-    // second parameter: key comparison, default: tinystl::less
-    template <class Key, class Compare = tinystl::less<Key>>
-    class multiset
+    // second parameter: value type
+    // third parameter: comparison method, default: tinystl::less
+    template <class Key, class T, class Compare = tinystl::less<Key>>
+    class multimap
     {
     public:
-        typedef Key        key_type;
-        typedef Key        value_type;
-        typedef Compare    key_compare;
-        typedef Compare    value_compare;
+        typedef Key                        key_type;
+        typedef T                          mapped_type;
+        typedef tinystl::pair<const Key, T>  value_type;
+        typedef Compare                    key_compare;
+
+        class value_compare : public binary_function <value_type, value_type, bool>
+        {
+            friend class multimap<Key, T, Compare>;
+        private:
+            Compare comp;
+            value_compare(Compare c) : comp(c) {}
+        public:
+            bool operator()(const value_type& lhs, const value_type& rhs) const
+            {
+                return comp(lhs.first, rhs.first);
+            }
+        };
 
     private:
         // rb_tree
         typedef tinystl::rb_tree<value_type, key_compare>  base_type;
-        base_type tree_; 
+        base_type tree_;
 
     public:
         typedef typename base_type::node_type              node_type;
 
-        typedef typename base_type::const_pointer          pointer;
+        typedef typename base_type::pointer                pointer;
         typedef typename base_type::const_pointer          const_pointer;
-        
-        typedef typename base_type::const_reference        reference;
+
+        typedef typename base_type::reference              reference;
         typedef typename base_type::const_reference        const_reference;
 
-        typedef typename base_type::const_iterator         iterator;
+        typedef typename base_type::iterator               iterator;
         typedef typename base_type::const_iterator         const_iterator;
 
-        typedef typename base_type::const_reverse_iterator reverse_iterator;
+        typedef typename base_type::reverse_iterator       reverse_iterator;
         typedef typename base_type::const_reverse_iterator const_reverse_iterator;
 
         typedef typename base_type::size_type              size_type;
@@ -322,35 +385,37 @@ namespace tinystl
 
     public:
         // constructor
-        multiset() = default;
+        multimap() = default;
 
         template <class InputIterator>
-        multiset(InputIterator first, InputIterator last): tree_() 
+        multimap(InputIterator first, InputIterator last): tree_() 
         { tree_.insert_multi(first, last); }
 
-        multiset(std::initializer_list<value_type> ilist): tree_() 
+        multimap(std::initializer_list<value_type> ilist): tree_() 
         { tree_.insert_multi(ilist.begin(), ilist.end()); }
 
         // copy constructor
-        multiset(const multiset& rhs): tree_(rhs.tree_)
+        multimap(const multimap& rhs): tree_(rhs.tree_)
         {}
         // move constructor
-        multiset(multiset&& rhs) noexcept: tree_(tinystl::move(rhs.tree_))
+        multimap(multimap&& rhs) noexcept: tree_(tinystl::move(rhs.tree_))
         {}
+
         // copy assignment
-        multiset& operator=(const multiset& rhs) 
+        multimap& operator=(const multimap& rhs) 
         { 
-            tree_ = rhs.tree_;
+            tree_ = rhs.tree_; 
             return *this; 
         }
         // move assignment
-        multiset& operator=(multiset&& rhs)
-        {
+        multimap& operator=(multimap&& rhs) 
+        { 
             tree_ = tinystl::move(rhs.tree_);
             return *this; 
         }
+
         // assignment
-        multiset& operator=(std::initializer_list<value_type> ilist)
+        multimap& operator=(std::initializer_list<value_type> ilist)
         {
             tree_.clear();
             tree_.insert_multi(ilist.begin(), ilist.end());
@@ -362,11 +427,12 @@ namespace tinystl
         { return tree_.key_comp(); }
 
         value_compare value_comp() const 
-        { return tree_.key_comp(); }
+        { return value_compare(tree_.key_comp()); }
 
         allocator_type get_allocator() const 
         { return tree_.get_allocator(); }
 
+        // iterator related operations
         iterator begin() noexcept
         { return tree_.begin(); }
 
@@ -403,7 +469,7 @@ namespace tinystl
         const_reverse_iterator crend() const noexcept
         { return rend(); }
 
-        // container related operations
+        // container
         bool empty() const noexcept 
         { return tree_.empty(); }
 
@@ -429,7 +495,6 @@ namespace tinystl
         {
             return tree_.insert_multi(value);
         }
-
         iterator insert(value_type&& value)
         {
             return tree_.insert_multi(tinystl::move(value));
@@ -450,10 +515,10 @@ namespace tinystl
             tree_.insert_multi(first, last);
         }
 
-        void erase(iterator position)             
+        void erase(iterator position) 
         { tree_.erase(position); }
 
-        size_type erase(const key_type& key) 
+        size_type erase(const key_type& key)           
         { return tree_.erase_multi(key); }
 
         void erase(iterator first, iterator last) 
@@ -486,60 +551,59 @@ namespace tinystl
         pair<iterator, iterator> equal_range(const key_type& key)
         { return tree_.equal_range_multi(key); }
 
-        pair<const_iterator, const_iterator> equal_range(const key_type& key) const
+        pair<const_iterator, const_iterator> equal_range(const key_type& key) const 
         { return tree_.equal_range_multi(key); }
 
-        void swap(multiset& rhs) noexcept
+        void swap(multimap& rhs) noexcept
         { tree_.swap(rhs.tree_); }
 
     public:
-        friend bool operator==(const multiset& lhs, const multiset& rhs) 
+        friend bool operator==(const multimap& lhs, const multimap& rhs) 
         { return lhs.tree_ == rhs.tree_; }
 
-        friend bool operator< (const multiset& lhs, const multiset& rhs) 
+        friend bool operator< (const multimap& lhs, const multimap& rhs) 
         { return lhs.tree_ <  rhs.tree_; }
     };
 
-    // overload comparison operations
-    template <class Key, class Compare>
-    bool operator==(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator==(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return lhs == rhs;
     }
 
-    template <class Key, class Compare>
-    bool operator<(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator<(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return lhs < rhs;
     }
 
-    template <class Key, class Compare>
-    bool operator!=(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator!=(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return !(lhs == rhs);
     }
 
-    template <class Key, class Compare>
-    bool operator>(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator>(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return rhs < lhs;
     }
 
-    template <class Key, class Compare>
-    bool operator<=(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator<=(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return !(rhs < lhs);
     }
 
-    template <class Key, class Compare>
-    bool operator>=(const multiset<Key, Compare>& lhs, const multiset<Key, Compare>& rhs)
+    template <class Key, class T, class Compare>
+    bool operator>=(const multimap<Key, T, Compare>& lhs, const multimap<Key, T, Compare>& rhs)
     {
         return !(lhs < rhs);
     }
 
     // swap
-    template <class Key, class Compare>
-    void swap(multiset<Key, Compare>& lhs, multiset<Key, Compare>& rhs) noexcept
+    template <class Key, class T, class Compare>
+    void swap(multimap<Key, T, Compare>& lhs, multimap<Key, T, Compare>& rhs) noexcept
     {
         lhs.swap(rhs);
     }
